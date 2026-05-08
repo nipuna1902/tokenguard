@@ -28,6 +28,10 @@ export function TeamProfileStep({
   setPrimaryUseCase,
   onNext,
 }: TeamProfileStepProps) {
+  const isFormValid =
+    teamSize > 0 &&
+    primaryUseCase.length > 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -95,11 +99,17 @@ export function TeamProfileStep({
         <div className="mt-12 flex justify-end">
           <Button
             onClick={onNext}
-            className="rounded-full bg-[#C9ADA7] px-7 py-6 text-black transition-all duration-300 hover:scale-[1.03] hover:bg-[#dcc2bc]"
+            disabled={!isFormValid}
+            className="rounded-full bg-[#C9ADA7] px-7 py-6 text-black transition-all duration-300 hover:scale-[1.03] hover:bg-[#dcc2bc] disabled:cursor-not-allowed disabled:opacity-40"
           >
             Continue
           </Button>
         </div>
+        {!isFormValid && (
+          <p className="mt-5 text-sm text-[#8D817C]">
+            Please complete all fields before continuing.
+          </p>
+        )}
       </div>
     </motion.div>
   );

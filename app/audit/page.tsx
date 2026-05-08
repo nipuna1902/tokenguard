@@ -6,6 +6,8 @@ import { StepIndicator } from "@/components/audit/step-indicator";
 import { TeamProfileStep } from "@/components/audit/team-profile-step";
 import { ToolSelectionStep } from "@/components/audit/tool-selection-step";
 import { ReviewStep } from "@/components/audit/review-step";
+import { generateAudit } from "@/lib/audit-engine";
+import { AuditResults } from "@/components/audit/audit-results";
 
 export default function AuditPage() {
   const [currentStep, setCurrentStep] =
@@ -24,6 +26,8 @@ export default function AuditPage() {
       seats: 1,
     },
   ]);
+  const [auditResult, setAuditResult] =
+  useState<any>(null);
 
   return (
     <main className="min-h-screen bg-black text-[#F2E9E4]">
@@ -60,10 +64,22 @@ export default function AuditPage() {
             tools={tools}
             onBack={() => setCurrentStep(2)}
             onGenerate={() => {
-              console.log("Generate audit");
-            }}
+            const result = generateAudit({
+              teamSize,
+              primaryUseCase:
+                primaryUseCase as any,
+              tools,
+            });
+
+            setAuditResult(result);
+
+            console.log(result);
+          }}
           />
         )}
+        {auditResult && (
+        <AuditResults result={auditResult} />
+      )}
       </div>
     </main>
   );
