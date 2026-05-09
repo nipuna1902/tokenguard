@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
+
 import { supabase } from "@/lib/supabase";
 
 interface LeadCaptureProps {
@@ -34,39 +36,89 @@ export function LeadCapture({
   const [success, setSuccess] =
     useState(false);
 
+  const [reportId, setReportId] =
+    useState("");
+
   async function handleSave() {
     if (!email) return;
 
     setLoading(true);
 
-    const { error } =
-      await supabase
-        .from("audit_reports")
-        .insert([
-          {
-            email,
-            company,
-            role,
-            team_size: teamSize,
-            primary_use_case:
-              primaryUseCase,
-            tools,
-            monthly_spend:
-              auditResult.totalMonthlySpend,
-            monthly_savings:
-              auditResult.estimatedMonthlySavings,
-            annual_spend:
-              auditResult.estimatedAnnualSpend,
-            ai_summary: summary,
-          },
-        ]);
+    const {
+      data,
+      error,
+    } = await supabase
+      .from("audit_reports")
+      .insert([
+        {
+          email,
+
+          company:
+            company || null,
+
+          role:
+            role || null,
+
+          team_size: Number(
+            teamSize
+          ),
+
+          primary_use_case:
+            primaryUseCase,
+
+          tools,
+
+          monthly_spend: Number(
+            auditResult.totalMonthlySpend
+          ),
+
+          monthly_savings:
+            Number(
+              auditResult.estimatedMonthlySavings
+            ),
+
+          annual_spend: Number(
+            auditResult.estimatedAnnualSpend
+          ),
+
+          ai_summary: summary,
+        },
+      ])
+      .select();
 
     setLoading(false);
 
-    if (!error) {
+    console.log(
+      "INSERT RESPONSE:",
+      {
+        data,
+        error,
+      }
+    );
+
+    if (!error && data) {
+      const insertedReportId =
+        data[0]?.id;
+
+      console.log(
+        "REPORT ID:",
+        insertedReportId
+      );
+
+      setReportId(
+        insertedReportId
+      );
+
       setSuccess(true);
     } else {
-      console.error(error);
+      console.log(
+        "SUPABASE ERROR:",
+        JSON.stringify(
+          error,
+          null,
+          2
+        )
+      );
     }
   }
 
@@ -81,8 +133,19 @@ export function LeadCapture({
       </p>
 
       {success ? (
-        <div className="mt-8 rounded-2xl border border-green-500/20 bg-green-500/10 p-6 text-green-200">
-          Your audit report was saved successfully.
+        <div className="mt-8">
+          <div className="rounded-2xl border border-green-500/20 bg-green-500/10 p-6 text-green-200">
+            Your audit report was saved successfully.
+          </div>
+
+          <div className="mt-6">
+            <Link
+              href={`/audit/report/${reportId}`}
+              className="inline-flex rounded-full bg-[#C9ADA7] px-6 py-3 text-sm font-medium text-black transition-all duration-300 hover:bg-[#dcc2bc]"
+            >
+              View Shareable Report
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="mt-8 grid gap-4">
@@ -91,7 +154,9 @@ export function LeadCapture({
             placeholder="Email address"
             value={email}
             onChange={(e) =>
-              setEmail(e.target.value)
+              setEmail(
+                e.target.value
+              )
             }
             className="h-14 rounded-2xl border border-white/10 bg-black/30 px-5 text-[#F2E9E4] outline-none"
           />
@@ -101,7 +166,9 @@ export function LeadCapture({
             placeholder="Company name (optional)"
             value={company}
             onChange={(e) =>
-              setCompany(e.target.value)
+              setCompany(
+                e.target.value
+              )
             }
             className="h-14 rounded-2xl border border-white/10 bg-black/30 px-5 text-[#F2E9E4] outline-none"
           />
@@ -111,7 +178,9 @@ export function LeadCapture({
             placeholder="Role (optional)"
             value={role}
             onChange={(e) =>
-              setRole(e.target.value)
+              setRole(
+                e.target.value
+              )
             }
             className="h-14 rounded-2xl border border-white/10 bg-black/30 px-5 text-[#F2E9E4] outline-none"
           />

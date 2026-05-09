@@ -1,0 +1,165 @@
+import { supabase } from "@/lib/supabase";
+
+interface ReportPageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function ReportPage({
+  params,
+}: ReportPageProps) {
+  const { id } =
+    await params;
+
+  const {
+    data: report,
+    error,
+  } = await supabase
+    .from("audit_reports")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !report) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-black text-[#F2E9E4]">
+        <div className="text-center">
+          <h1 className="text-4xl font-semibold">
+            Report not found
+          </h1>
+
+          <p className="mt-4 text-[#8D817C]">
+            This audit report may
+            have been removed or
+            does not exist.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-black px-6 py-24 text-[#F2E9E4]">
+      <div className="mx-auto max-w-5xl">
+        <div className="rounded-[2rem] border border-[#C9ADA7]/10 bg-[#C9ADA7]/5 p-10 backdrop-blur-2xl">
+          <div className="inline-flex rounded-full border border-[#C9ADA7]/20 bg-[#C9ADA7]/10 px-4 py-2 text-sm text-[#C9ADA7]">
+            Public Audit Report
+          </div>
+
+          <h1 className="mt-6 text-5xl font-semibold tracking-tight">
+            AI Spend Analysis
+          </h1>
+
+          <p className="mt-5 max-w-3xl text-lg leading-8 text-[#B8AAA4]">
+            This public audit report
+            highlights AI tooling
+            optimization opportunities
+            identified by TokenGuard.
+          </p>
+
+          <div className="mt-14 grid gap-6 md:grid-cols-3">
+            <div className="rounded-[2rem] border border-white/10 bg-black/20 p-8">
+              <div className="text-sm text-[#8D817C]">
+                Monthly Spend
+              </div>
+
+              <div className="mt-4 text-5xl font-semibold">
+                $
+                {
+                  report.monthly_spend
+                }
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-black/20 p-8">
+              <div className="text-sm text-[#8D817C]">
+                Annual Spend
+              </div>
+
+              <div className="mt-4 text-5xl font-semibold">
+                $
+                {
+                  report.annual_spend
+                }
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-[#C9ADA7]/20 bg-[#C9ADA7]/10 p-8">
+              <div className="text-sm text-[#8D817C]">
+                Potential Savings
+              </div>
+
+              <div className="mt-4 text-5xl font-semibold text-[#C9ADA7]">
+                $
+                {
+                  report.monthly_savings
+                }
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 rounded-[2rem] border border-white/10 bg-black/20 p-8">
+            <h2 className="text-3xl font-semibold">
+              AI Generated Summary
+            </h2>
+
+            <p className="mt-6 leading-8 text-[#B8AAA4]">
+              {
+                report.ai_summary
+              }
+            </p>
+          </div>
+
+          <div className="mt-16">
+            <h2 className="text-3xl font-semibold">
+              Tool Stack
+            </h2>
+
+            <div className="mt-8 grid gap-5 md:grid-cols-2">
+              {report.tools.map(
+                (
+                  tool: any,
+                  index: number
+                ) => (
+                  <div
+                    key={index}
+                    className="rounded-[2rem] border border-white/10 bg-black/20 p-6"
+                  >
+                    <div className="text-xl font-medium">
+                      {
+                        tool.toolId
+                      }
+                    </div>
+
+                    <div className="mt-3 text-[#8D817C]">
+                      Plan:{" "}
+                      {
+                        tool.planId
+                      }
+                    </div>
+
+                    <div className="mt-1 text-[#8D817C]">
+                      Monthly Spend:
+                      $
+                      {
+                        tool.monthlySpend
+                      }
+                    </div>
+
+                    <div className="mt-1 text-[#8D817C]">
+                      Seats:{" "}
+                      {
+                        tool.seats
+                      }
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
