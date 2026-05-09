@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import { StepIndicator } from "@/components/audit/step-indicator";
 import { TeamProfileStep } from "@/components/audit/team-profile-step";
@@ -34,11 +37,15 @@ export default function AuditPage() {
 
   const [auditResult, setAuditResult] =
     useState<any>(null);
+
   const [aiSummary, setAiSummary] =
-  useState("");
+    useState("");
+
   useEffect(() => {
     const savedSession =
-      localStorage.getItem(STORAGE_KEY);
+      localStorage.getItem(
+        STORAGE_KEY
+      );
 
     if (!savedSession) return;
 
@@ -71,7 +78,12 @@ export default function AuditPage() {
     setAuditResult(
       parsed.auditResult || null
     );
+
+    setAiSummary(
+      parsed.aiSummary || ""
+    );
   }, []);
+
   useEffect(() => {
     const sessionData = {
       currentStep,
@@ -79,6 +91,7 @@ export default function AuditPage() {
       primaryUseCase,
       tools,
       auditResult,
+      aiSummary,
     };
 
     localStorage.setItem(
@@ -91,8 +104,10 @@ export default function AuditPage() {
     primaryUseCase,
     tools,
     auditResult,
+    aiSummary,
   ]);
-  const resetSession = () => {
+
+  function handleReset() {
     localStorage.removeItem(
       STORAGE_KEY
     );
@@ -113,27 +128,9 @@ export default function AuditPage() {
     ]);
 
     setAuditResult(null);
-  };
-  function handleReset() {
-  setCurrentStep(1);
 
-  setTeamSize(0);
-
-  setPrimaryUseCase("");
-
-  setTools([
-    {
-      toolId: "",
-      planId: "",
-      monthlySpend: 0,
-      seats: 1,
-    },
-  ]);
-
-  setAuditResult(null);
-
-  setAiSummary("");
-}
+    setAiSummary("");
+  }
 
   return (
     <main className="min-h-screen bg-black text-[#F2E9E4]">
@@ -147,7 +144,9 @@ export default function AuditPage() {
             {currentStep === 1 && (
               <TeamProfileStep
                 teamSize={teamSize}
-                setTeamSize={setTeamSize}
+                setTeamSize={
+                  setTeamSize
+                }
                 primaryUseCase={
                   primaryUseCase
                 }
@@ -184,42 +183,53 @@ export default function AuditPage() {
                   setCurrentStep(2)
                 }
                 onGenerate={async () => {
-                const result = generateAudit({
-                  teamSize,
-                  primaryUseCase:
-                    primaryUseCase as any,
-                  tools,
-                });
+                  const result =
+                    generateAudit({
+                      teamSize,
+                      primaryUseCase:
+                        primaryUseCase as any,
+                      tools,
+                    });
 
-                setAuditResult(result);
-
-                try {
-                  const response = await fetch(
-                    "/api/generate-summary",
-                    {
-                      method: "POST",
-
-                      headers: {
-                        "Content-Type":
-                          "application/json",
-                      },
-
-                      body: JSON.stringify({
-                        teamSize,
-                        primaryUseCase,
-                        auditResult: result,
-                      }),
-                    }
+                  setAuditResult(
+                    result
                   );
 
-                  const data =
-                    await response.json();
+                  try {
+                    const response =
+                      await fetch(
+                        "/api/generate-summary",
+                        {
+                          method: "POST",
 
-                  setAiSummary(data.summary);
-                } catch (error) {
-                  console.error(error);
-                }
-              }}
+                          headers: {
+                            "Content-Type":
+                              "application/json",
+                          },
+
+                          body: JSON.stringify(
+                            {
+                              teamSize,
+                              primaryUseCase,
+                              auditResult:
+                                result,
+                            }
+                          ),
+                        }
+                      );
+
+                    const data =
+                      await response.json();
+
+                    setAiSummary(
+                      data.summary
+                    );
+                  } catch (error) {
+                    console.error(
+                      error
+                    );
+                  }
+                }}
               />
             )}
           </>
@@ -227,15 +237,15 @@ export default function AuditPage() {
 
         {auditResult && (
           <AuditResults
-          result={auditResult}
-          summary={aiSummary}
-          onReset={handleReset}
-          teamSize={teamSize}
-          primaryUseCase={
-            primaryUseCase
-          }
-          tools={tools}
-        />
+            result={auditResult}
+            summary={aiSummary}
+            onReset={handleReset}
+            teamSize={teamSize}
+            primaryUseCase={
+              primaryUseCase
+            }
+            tools={tools}
+          />
         )}
       </div>
     </main>
