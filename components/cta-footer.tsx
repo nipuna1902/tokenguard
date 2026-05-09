@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function CTAFooter() {
   return (
@@ -46,9 +47,11 @@ export function CTAFooter() {
             </p>
 
             <div className="mt-12">
-              <Button className="rounded-full bg-[#C9ADA7] px-9 py-7 text-base font-medium text-black transition-all duration-300 hover:scale-[1.03] hover:bg-[#dcc2bc] hover:shadow-2xl hover:shadow-[#C9ADA7]/10">
-                Start Your Free Audit
-              </Button>
+              <Link href="/audit">
+                <Button className="rounded-full bg-[#C9ADA7] px-9 py-7 text-base font-medium text-black transition-all duration-300 hover:scale-[1.03] hover:bg-[#dcc2bc] hover:shadow-2xl hover:shadow-[#C9ADA7]/10">
+                  Start Your Free Audit
+                </Button>
+              </Link>
             </div>
 
             <div className="mt-8 text-sm text-[#8D817C]">

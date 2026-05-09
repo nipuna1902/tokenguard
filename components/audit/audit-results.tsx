@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { AuditResult } from "@/types/audit";
+import { LeadCapture } from "./lead-capture";
 
 interface AuditResultsProps {
   result: AuditResult;
@@ -9,6 +10,12 @@ interface AuditResultsProps {
   summary: string;
 
   onReset: () => void;
+
+  teamSize: number;
+
+  primaryUseCase: string;
+
+  tools: any[];
 }
 
 const severityStyles = {
@@ -24,6 +31,9 @@ export function AuditResults({
   result,
   summary,
   onReset,
+  teamSize,
+  primaryUseCase,
+  tools
 }: AuditResultsProps) {
   const efficiencyScore = Math.max(
     100 -
@@ -223,6 +233,15 @@ export function AuditResults({
           )}
         </div>
       </div>
+      <LeadCapture
+          auditResult={result}
+          summary={summary}
+          teamSize={teamSize}
+          primaryUseCase={
+            primaryUseCase
+          }
+          tools={tools}
+        />
       <div className="mt-16 flex justify-center">
         <button
           onClick={onReset}

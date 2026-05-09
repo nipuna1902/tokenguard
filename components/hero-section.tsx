@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { FadeIn } from "./fade-in";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -29,12 +30,14 @@ export function HeroSection() {
         </FadeIn>
         <FadeIn delay={0.4}>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link href="/audit">
           <Button
             size="lg"
             className="rounded-full bg-[#C9ADA7] px-8 text-[#22223B] hover:bg-[#dcc2bc] hover:scale-[1.02] transition-all duration-300"
           >
             Run Free Audit
           </Button>
+          </Link>
 
           <Button
             variant="outline"

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function Navbar() {
   return (
@@ -24,9 +25,11 @@ export function Navbar() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Button className="rounded-full bg-[#C9ADA7] px-5 text-black transition-all duration-300 hover:scale-[1.03] hover:bg-[#dcc2bc] hover:shadow-lg hover:shadow-[#C9ADA7]/10">
-              Start Free Audit
-            </Button>
+            <Link href="/audit">
+              <Button className="rounded-full bg-[#C9ADA7] px-5 text-black transition-all duration-300 hover:scale-[1.03] hover:bg-[#dcc2bc] hover:shadow-lg hover:shadow-[#C9ADA7]/10">
+                Start Free Audit
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

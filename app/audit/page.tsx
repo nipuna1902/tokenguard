@@ -114,6 +114,26 @@ export default function AuditPage() {
 
     setAuditResult(null);
   };
+  function handleReset() {
+  setCurrentStep(1);
+
+  setTeamSize(0);
+
+  setPrimaryUseCase("");
+
+  setTools([
+    {
+      toolId: "",
+      planId: "",
+      monthlySpend: 0,
+      seats: 1,
+    },
+  ]);
+
+  setAuditResult(null);
+
+  setAiSummary("");
+}
 
   return (
     <main className="min-h-screen bg-black text-[#F2E9E4]">
@@ -207,10 +227,15 @@ export default function AuditPage() {
 
         {auditResult && (
           <AuditResults
-            result={auditResult}
-            summary={aiSummary}
-            onReset={resetSession}
-          />
+          result={auditResult}
+          summary={aiSummary}
+          onReset={handleReset}
+          teamSize={teamSize}
+          primaryUseCase={
+            primaryUseCase
+          }
+          tools={tools}
+        />
         )}
       </div>
     </main>

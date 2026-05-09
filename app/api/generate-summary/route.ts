@@ -49,7 +49,7 @@ Requirements:
 
     const model =
       genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-2.5-flash",
       });
 
     const result =
@@ -63,15 +63,16 @@ Requirements:
     return Response.json({
       summary: responseText,
     });
-  } catch (error) {
-    console.error(
-      "Gemini API Error:",
-      error
-    );
+  } catch (error: any) {
+  console.error(
+    "FULL GEMINI ERROR:"
+  );
 
-    return Response.json({
-      summary:
-        "Your organization’s AI tooling stack shows several opportunities for optimization. TokenGuard identified potential savings through improved seat allocation, plan optimization, and workflow consolidation strategies.",
-    });
-  }
+  console.error(error);
+
+  return Response.json({
+    summary:
+      "Your organization’s AI tooling stack shows several opportunities for optimization. TokenGuard identified potential savings through improved seat allocation, plan optimization, and workflow consolidation strategies.",
+  });
+}
 }
