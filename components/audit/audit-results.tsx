@@ -5,6 +5,10 @@ import { AuditResult } from "@/types/audit";
 
 interface AuditResultsProps {
   result: AuditResult;
+
+  summary: string;
+
+  onReset: () => void;
 }
 
 const severityStyles = {
@@ -18,6 +22,8 @@ const severityStyles = {
 
 export function AuditResults({
   result,
+  summary,
+  onReset,
 }: AuditResultsProps) {
   const efficiencyScore = Math.max(
     100 -
@@ -25,6 +31,18 @@ export function AuditResults({
         8,
     52
   );
+
+  const annualSavings =
+    result.estimatedMonthlySavings *
+    12;
+
+  const highSavings =
+    result.estimatedMonthlySavings >=
+    500;
+
+  const lowSavings =
+    result.estimatedMonthlySavings <
+    100;
 
   return (
     <motion.div
@@ -43,7 +61,7 @@ export function AuditResults({
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#B8AAA4]">
-          TokenGuard analyzed your current AI tooling stack and identified several opportunities to optimize spending and reduce operational waste.
+          TokenGuard analyzed your AI tooling stack and identified optimization opportunities based on pricing efficiency, seat allocation, and workflow overlap.
         </p>
       </div>
       <div className="mt-16 grid gap-6 md:grid-cols-3">
@@ -59,7 +77,7 @@ export function AuditResults({
 
         <div className="rounded-[2rem] border border-white/10 bg-[#C9ADA7]/5 p-8 backdrop-blur-2xl">
           <div className="text-sm text-[#8D817C]">
-            Annual projection
+            Annual spend
           </div>
 
           <div className="mt-4 text-5xl font-semibold tracking-tight text-[#F2E9E4]">
@@ -74,6 +92,10 @@ export function AuditResults({
 
           <div className="mt-4 text-5xl font-semibold tracking-tight text-[#C9ADA7]">
             ${result.estimatedMonthlySavings}
+          </div>
+
+          <div className="mt-3 text-sm text-[#B8AAA4]">
+            ≈ ${annualSavings}/year
           </div>
         </div>
       </div>
@@ -90,6 +112,55 @@ export function AuditResults({
           Your AI tooling stack appears moderately optimized, though several cost-reduction opportunities were identified.
         </p>
       </div>
+      <div className="mt-10 rounded-[2rem] border border-[#C9ADA7]/10 bg-[#C9ADA7]/5 p-10 backdrop-blur-2xl">
+        <div className="text-sm text-[#8D817C]">
+          AI-generated executive summary
+        </div>
+
+        <p className="mt-5 text-lg leading-8 text-[#F2E9E4]">
+          {summary}
+        </p>
+      </div>
+      {highSavings && (
+        <div className="mt-10 rounded-[2rem] border border-[#C9ADA7]/20 bg-[#C9ADA7]/10 p-10 text-center backdrop-blur-2xl">
+          <div className="text-sm uppercase tracking-wide text-[#C9ADA7]">
+            High-impact optimization opportunity
+          </div>
+
+          <h2 className="mt-4 text-3xl font-semibold text-[#F2E9E4]">
+            Your team could potentially save over $
+            {result.estimatedMonthlySavings}
+            /month
+          </h2>
+
+          <p className="mx-auto mt-5 max-w-2xl leading-8 text-[#B8AAA4]">
+            Teams with high AI infrastructure spend often uncover additional savings through centralized procurement, credit optimization, and vendor consolidation strategies.
+          </p>
+
+          <button className="mt-8 rounded-full bg-[#C9ADA7] px-8 py-4 text-black transition-all duration-300 hover:scale-[1.02] hover:bg-[#dcc2bc]">
+            Book Credex Consultation
+          </button>
+        </div>
+      )}
+      {lowSavings && (
+        <div className="mt-10 rounded-[2rem] border border-green-500/20 bg-green-500/5 p-10 text-center backdrop-blur-2xl">
+          <div className="text-sm uppercase tracking-wide text-green-300">
+            Efficient stack detected
+          </div>
+
+          <h2 className="mt-4 text-3xl font-semibold text-[#F2E9E4]">
+            Your AI spend already appears relatively optimized
+          </h2>
+
+          <p className="mx-auto mt-5 max-w-2xl leading-8 text-[#B8AAA4]">
+            TokenGuard identified limited immediate savings opportunities based on your current tooling allocation and pricing structure.
+          </p>
+
+          <button className="mt-8 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-[#F2E9E4] transition-all duration-300 hover:bg-white/10">
+            Notify Me About Future Optimizations
+          </button>
+        </div>
+      )}
       <div className="mt-16">
         <h2 className="text-3xl font-semibold tracking-tight text-[#F2E9E4]">
           Optimization recommendations
@@ -151,6 +222,14 @@ export function AuditResults({
             )
           )}
         </div>
+      </div>
+      <div className="mt-16 flex justify-center">
+        <button
+          onClick={onReset}
+          className="rounded-full border border-white/10 bg-white/5 px-6 py-3 text-sm text-[#F2E9E4] transition-all duration-300 hover:bg-white/10"
+        >
+          Start New Audit
+        </button>
       </div>
     </motion.div>
   );

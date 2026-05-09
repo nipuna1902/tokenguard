@@ -4,6 +4,8 @@ import {
   AuditResult,
 } from "@/types/audit";
 
+import { pricingData } from "./pricing-data";
+
 export function generateAudit(
   data: AuditFormData
 ): AuditResult {
@@ -18,103 +20,134 @@ export function generateAudit(
     totalMonthlySpend +=
       tool.monthlySpend;
 
-    // High spend detection
-    if (tool.monthlySpend > 200) {
-      const savings = Math.round(
-        tool.monthlySpend * 0.18
+    const toolData =
+      pricingData[
+        tool.toolId as keyof typeof pricingData
+      ];
+
+    if (!toolData) continue;
+
+    const currentPlan =
+      toolData.plans.find(
+        (plan) =>
+          plan.id === tool.planId
       );
 
-      recommendations.push({
-        tool: tool.toolId,
-
-        severity: "high",
-
-        title:
-          "High monthly spend detected",
-
-        description:
-          "Your current usage appears significantly higher than typical startup team usage for this tool. Consider evaluating lower-tier plans, consolidating seats, or optimizing workflows.",
-
-        estimatedSavings: savings,
-      });
-
-      estimatedMonthlySavings += savings;
-    }
-
-    // Unused seat allocation
+    if (!currentPlan) continue;
     if (
-      tool.seats > data.teamSize
+      data.teamSize <
+      currentPlan.recommendedTeamSize /
+        3
+    ) {
+      const cheaperPlan =
+        toolData.plans.find(
+          (plan) =>
+            plan.monthlyPrice <
+            currentPlan.monthlyPrice
+        );
+
+      if (cheaperPlan) {
+        const savings =
+          (
+            currentPlan.monthlyPrice -
+            cheaperPlan.monthlyPrice
+          ) * tool.seats;
+
+        if (savings > 0) {
+          recommendations.push({
+            tool: toolData.name,
+
+            severity: "high",
+
+            title:
+              "Current plan appears oversized",
+
+            description: `${currentPlan.name} is typically optimized for larger teams. Based on your current team size, ${cheaperPlan.name} would likely provide sufficient functionality at a lower operational cost.`,
+
+            estimatedSavings: savings,
+          });
+
+          estimatedMonthlySavings +=
+            savings;
+        }
+      }
+    }
+    if (
+      tool.seats >
+      data.teamSize
     ) {
       const unusedSeats =
-        tool.seats - data.teamSize;
+        tool.seats -
+        data.teamSize;
 
       const savings =
-        unusedSeats * 15;
+        unusedSeats *
+        currentPlan.monthlyPrice;
 
-      recommendations.push({
-        tool: tool.toolId,
+      if (savings > 0) {
+        recommendations.push({
+          tool: toolData.name,
 
-        severity: "medium",
+          severity: "medium",
 
-        title:
-          "Potential unused seat allocation",
+          title:
+            "Potential unused seat allocation",
 
-        description:
-          "Your configured seat count exceeds your declared team size. You may be paying for inactive or unnecessary seats.",
+          description: `Your organization currently pays for ${tool.seats} seats despite a declared team size of ${data.teamSize}. Removing inactive seats could reduce unnecessary recurring costs.`,
 
-        estimatedSavings: savings,
-      });
+          estimatedSavings: savings,
+        });
 
-      estimatedMonthlySavings +=
-        savings;
+        estimatedMonthlySavings +=
+          savings;
+      }
     }
-
-    // Enterprise downgrade detection
-    if (
-      tool.planId ===
-        "enterprise" &&
-      data.teamSize < 15
-    ) {
-      const savings = Math.round(
-        tool.monthlySpend * 0.35
-      );
-
-      recommendations.push({
-        tool: tool.toolId,
-
-        severity: "high",
-
-        title:
-          "Enterprise plan may be unnecessary",
-
-        description:
-          "Smaller startup teams often do not fully utilize enterprise-tier AI tooling features. Downgrading to a lower plan could significantly reduce recurring costs.",
-
-        estimatedSavings: savings,
-      });
-
-      estimatedMonthlySavings +=
-        savings;
-    }
-
-    // Tool overlap detection
     if (
       data.tools.length >= 4
     ) {
-      const savings = Math.round(
-        tool.monthlySpend * 0.12
-      );
+      const overlapSavings =
+        Math.round(
+          tool.monthlySpend *
+            0.15
+        );
 
       recommendations.push({
-        tool: tool.toolId,
+        tool: toolData.name,
 
         severity: "low",
 
         title:
-          "AI tooling overlap detected",
+          "Potential tooling overlap detected",
 
-        description:
-          "Your stack includes several overlapping AI products. Consolidating workflows across fewer tools may improve efficiency and reduce operational complexity.",
+        description: `Your stack includes several overlapping AI products. Consolidating workflows across fewer platforms may reduce both cost and operational complexity.`,
+
+        estimatedSavings:
+          overlapSavings,
+      });
+
+      estimatedMonthlySavings +=
+        overlapSavings;
+    }
+    if (
+      currentPlan.tier ===
+        "enterprise" &&
+      data.teamSize < 10
+    ) {
+      const savings =
+        Math.round(
+          tool.monthlySpend *
+            0.35
+        );
+
+      recommendations.push({
+        tool: toolData.name,
+
+        severity: "high",
+
+        title:
+          "Enterprise tier may be unnecessary",
+
+        description: `Enterprise-grade AI subscriptions are generally optimized for larger organizations with compliance and governance requirements. Your current team profile suggests a lower-tier plan may provide similar utility.`,
 
         estimatedSavings: savings,
       });
@@ -122,6 +155,24 @@ export function generateAudit(
       estimatedMonthlySavings +=
         savings;
     }
+  }
+  if (
+    estimatedMonthlySavings <
+    100
+  ) {
+    recommendations.push({
+      tool: "Overall Stack",
+
+      severity: "low",
+
+      title:
+        "Your AI spend appears relatively optimized",
+
+      description:
+        "Based on the tools and plans provided, your organization already appears to be operating with relatively efficient AI tooling allocation. Limited optimization opportunities were identified.",
+
+      estimatedSavings: 0,
+    });
   }
 
   return {
