@@ -23,3 +23,16 @@ Learned how to structure dynamic multi-step onboarding flows in Next.js using re
 
 Blockers / what I'm stuck on:
 Spent time refining the audit savings logic because fixed-value optimization recommendations felt unrealistic for higher spending teams. Currently evaluating better proportional recommendation heuristics and considering more intelligent pricing-aware optimization models for future iterations.
+
+Day 3 - 09-05-2026
+
+Hours worked: 5
+
+What I did:
+Integrated Supabase as the backend database for TokenGuard and implemented persistent audit report storage. Built the complete lead capture workflow including email, company, and role collection after audit generation. Added AI-generated personalized summaries using the Gemini API with graceful fallback handling for API failures and quota issues. Implemented dynamic public shareable audit report pages using Next.js dynamic routing (`/audit/report/[id]`) and connected them to Supabase using UUID-based retrieval. Added browser-side audit session persistence using localStorage so form progress and audit state survive page refreshes. Also refined the overall SaaS workflow by connecting audit generation, report saving, and public sharing into a single seamless flow.
+
+What I learned:
+Learned how full-stack persistence workflows function using Supabase and PostgreSQL, including insert operations, UUID generation, schema typing, and debugging database-related errors. Explored dynamic routing in the Next.js App Router and understood how URL parameters can be used to render public shareable pages from backend data. Also gained hands-on experience integrating LLM APIs into production-style workflows while handling quota limits, API failures, and fallback responses gracefully. Improved my understanding of browser persistence using localStorage and how SaaS products preserve onboarding progress across sessions.
+
+Blockers / what I'm stuck on:
+Spent significant time debugging Supabase Row Level Security (RLS) permissions, schema mismatches, and numeric type conversion issues caused by incorrect database column types. Also faced challenges with Gemini API model compatibility and quota limitations before successfully migrating to a supported model configuration. Still need to implement production-focused polish features such as Open Graph previews, transactional emails, and Credex-specific conditional CTAs.
