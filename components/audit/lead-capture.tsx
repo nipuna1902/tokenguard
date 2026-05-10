@@ -86,8 +86,6 @@ export function LeadCapture({
       ])
       .select();
 
-    setLoading(false);
-
     console.log(
       "INSERT RESPONSE:",
       {
@@ -109,6 +107,28 @@ export function LeadCapture({
         insertedReportId
       );
 
+      await fetch(
+        "/api/send-email",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body: JSON.stringify({
+            email,
+
+            monthlySavings:
+              auditResult.estimatedMonthlySavings,
+
+            reportId:
+              insertedReportId,
+          }),
+        }
+      );
+
       setSuccess(true);
     } else {
       console.log(
@@ -120,6 +140,8 @@ export function LeadCapture({
         )
       );
     }
+
+    setLoading(false);
   }
 
   return (
