@@ -36,3 +36,16 @@ Learned how full-stack persistence workflows function using Supabase and Postgre
 
 Blockers / what I'm stuck on:
 Spent significant time debugging Supabase Row Level Security (RLS) permissions, schema mismatches, and numeric type conversion issues caused by incorrect database column types. Also faced challenges with Gemini API model compatibility and quota limitations before successfully migrating to a supported model configuration. Still need to implement production-focused polish features such as Open Graph previews, transactional emails, and Credex-specific conditional CTAs.
+
+Day 4 - 10-05-2026
+
+Hours worked: 3-4
+
+What I did:
+Focused on production-grade UX and backend workflow improvements for TokenGuard. Implemented dynamic SEO metadata generation using Next.js `generateMetadata()` for public audit report pages, enabling unique browser titles and proper Open Graph/Twitter preview support for each shared report URL. Added adaptive audit result states based on savings thresholds, including high-savings Credex consultation CTAs and honest low-savings optimization messaging. Completed persistent onboarding and audit state storage using localStorage so users can refresh or revisit the app without losing progress. Integrated transactional email delivery using Resend, allowing users to automatically receive their audit report links and savings summaries after saving reports. Connected the full workflow from frontend audit generation → Supabase persistence → public shareable reports → email delivery into a seamless end-to-end SaaS flow.
+
+What I learned:
+Learned how dynamic SEO and metadata generation work in the Next.js App Router using server-side `generateMetadata()` functions. Improved my understanding of how Open Graph and Twitter metadata power social sharing previews across platforms like LinkedIn and Twitter. Also explored transactional email architecture using Resend and understood how frontend actions securely communicate with backend API routes to trigger asynchronous workflows like email delivery. Gained deeper insight into adaptive SaaS UX patterns where business logic dynamically changes conversion flows and user messaging based on savings thresholds and user value.
+
+Blockers / what I'm stuck on:
+Spent time understanding how metadata generation works separately from visible UI rendering and how social platforms consume metadata from server-rendered HTML. Also had to debug transactional email setup issues related to environment variables and local development email restrictions. The remaining work is now mostly focused on final production polish, documentation files (`README.md`, `PRICING_DATA.md`, `PROMPTS.md`), abuse protection mechanisms, deployment preparation, and optional bonus features like PDF export and benchmark mode.
