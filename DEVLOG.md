@@ -49,3 +49,16 @@ Learned how dynamic SEO and metadata generation work in the Next.js App Router u
 
 Blockers / what I'm stuck on:
 Spent time understanding how metadata generation works separately from visible UI rendering and how social platforms consume metadata from server-rendered HTML. Also had to debug transactional email setup issues related to environment variables and local development email restrictions. The remaining work is now mostly focused on final production polish, documentation files (`README.md`, `PRICING_DATA.md`, `PROMPTS.md`), abuse protection mechanisms, deployment preparation, and optional bonus features like PDF export and benchmark mode.
+
+Day 5 - 11-05-2026
+
+Hours worked: 3
+
+What I did:
+Focused on final production-readiness and evaluator-facing documentation for TokenGuard. Implemented lightweight honeypot-based abuse protection to prevent automated spam submissions without introducing user friction through CAPTCHA systems. Created comprehensive engineering documentation including `PRICING_DATA.md`, which documents official vendor pricing sources, audit heuristics, and optimization assumptions used by the recommendation engine. Also completed `PROMPTS.md`, documenting the Gemini integration strategy, prompt engineering decisions, fallback handling logic, and the rationale behind limiting AI usage to executive summary generation instead of financial calculations. Refined overall project structure and finalized major SaaS workflow features before deployment preparation.
+
+What I learned:
+Learned how lightweight anti-spam techniques like honeypots work in production SaaS products and why many modern startups prefer them over intrusive CAPTCHA flows. Also gained a better understanding of how important engineering documentation is in communicating architecture decisions, product thinking, and AI usage philosophy to evaluators and collaborators. Explored how deterministic systems and LLM-generated outputs can be combined responsibly by separating critical business logic from presentation-oriented AI features.
+
+Blockers / what I'm stuck on:
+The core application is now largely complete, with remaining work focused mostly on deployment, automated testing, CI workflows, architecture documentation, and entrepreneurial evaluation files such as GTM, economics, metrics, and reflection documents. Still need to conduct real user interviews and implement automated audit-engine test coverage before final submission.
