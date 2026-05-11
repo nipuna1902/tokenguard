@@ -30,6 +30,9 @@ export function LeadCapture({
   const [role, setRole] =
     useState("");
 
+  const [website, setWebsite] =
+    useState("");
+
   const [loading, setLoading] =
     useState(false);
 
@@ -41,6 +44,8 @@ export function LeadCapture({
 
   async function handleSave() {
     if (!email) return;
+
+    if (website) return;
 
     setLoading(true);
 
@@ -206,6 +211,20 @@ export function LeadCapture({
             }
             className="h-14 rounded-2xl border border-white/10 bg-black/30 px-5 text-[#F2E9E4] outline-none"
           />
+
+          <div className="hidden">
+            <input
+              type="text"
+              value={website}
+              onChange={(e) =>
+                setWebsite(
+                  e.target.value
+                )
+              }
+              placeholder="Website"
+              autoComplete="off"
+            />
+          </div>
 
           <button
             onClick={handleSave}
