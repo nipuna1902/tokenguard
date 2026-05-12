@@ -9,7 +9,7 @@ The platform is designed for founders, engineering teams, and operations leaders
 # Live Demo
 
 Deployed URL:
-[Add deployed Vercel URL here]
+tokenguard-xi.vercel.app
 
 ---
 
