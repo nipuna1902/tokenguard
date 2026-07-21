@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AuditResult } from "@/types/audit";
+import { AuditResult, AuditToolInput } from "@/types/audit";
 import { LeadCapture } from "./lead-capture";
+import { pricingData } from "@/lib/pricing-data";
 
 interface AuditResultsProps {
   result: AuditResult;
@@ -15,7 +16,7 @@ interface AuditResultsProps {
 
   primaryUseCase: string;
 
-  tools: any[];
+  tools: AuditToolInput[];
 }
 
 const severityStyles = {
@@ -35,24 +36,9 @@ export function AuditResults({
   primaryUseCase,
   tools
 }: AuditResultsProps) {
-  const efficiencyScore = Math.max(
-    100 -
-      result.recommendations.length *
-        8,
-    52
-  );
-
   const annualSavings =
     result.estimatedMonthlySavings *
     12;
-
-  const highSavings =
-    result.estimatedMonthlySavings >=
-    500;
-
-  const lowSavings =
-    result.estimatedMonthlySavings <
-    100;
 
   return (
     <motion.div
@@ -71,7 +57,7 @@ export function AuditResults({
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#B8AAA4]">
-          TokenGuard analyzed your AI tooling stack and identified optimization opportunities based on pricing efficiency, seat allocation, and workflow overlap.
+          Recommendations are based on the plan prices shown below and the invoice totals you supplied. We only total savings that can be checked from seat counts; usage and contract changes are clearly marked for review.
         </p>
       </div>
       <div className="mt-16 grid gap-6 md:grid-cols-3">
@@ -81,7 +67,7 @@ export function AuditResults({
           </div>
 
           <div className="mt-4 text-5xl font-semibold tracking-tight text-[#F2E9E4]">
-            ${result.totalMonthlySpend}
+            ${result.totalMonthlySpend.toFixed(2)}
           </div>
         </div>
 
@@ -91,35 +77,35 @@ export function AuditResults({
           </div>
 
           <div className="mt-4 text-5xl font-semibold tracking-tight text-[#F2E9E4]">
-            ${result.estimatedAnnualSpend}
+            ${result.estimatedAnnualSpend.toFixed(2)}
           </div>
         </div>
 
         <div className="rounded-[2rem] border border-[#C9ADA7]/20 bg-[#C9ADA7]/10 p-8 backdrop-blur-2xl">
           <div className="text-sm text-[#8D817C]">
-            Potential monthly savings
+            Verified monthly savings
           </div>
 
           <div className="mt-4 text-5xl font-semibold tracking-tight text-[#C9ADA7]">
-            ${result.estimatedMonthlySavings}
+            ${result.estimatedMonthlySavings.toFixed(2)}
           </div>
 
           <div className="mt-3 text-sm text-[#B8AAA4]">
-            ≈ ${annualSavings}/year
+            ≈ ${annualSavings.toFixed(2)}/year
           </div>
         </div>
       </div>
-      <div className="mt-10 rounded-[2rem] border border-[#C9ADA7]/10 bg-[#C9ADA7]/5 p-10 text-center backdrop-blur-2xl">
+      <div className="mt-10 rounded-[2rem] border border-[#C9ADA7]/10 bg-[#C9ADA7]/5 p-8 text-center backdrop-blur-2xl">
         <div className="text-sm text-[#8D817C]">
-          Stack efficiency score
+          Reviewable opportunity (not included above)
         </div>
 
-        <div className="mt-5 text-7xl font-semibold tracking-tight text-[#F2E9E4]">
-          {efficiencyScore}%
+        <div className="mt-4 text-5xl font-semibold tracking-tight text-[#F2E9E4]">
+          ${result.reviewableMonthlySavings.toFixed(2)}/mo
         </div>
 
         <p className="mx-auto mt-5 max-w-2xl text-[#B8AAA4]">
-          Your AI tooling stack appears moderately optimized, though several cost-reduction opportunities were identified.
+          These are plausible savings that require contract, feature, or utilization validation before action. They are never added to the verified total.
         </p>
       </div>
       <div className="mt-10 rounded-[2rem] border border-[#C9ADA7]/10 bg-[#C9ADA7]/5 p-10 backdrop-blur-2xl">
@@ -131,46 +117,6 @@ export function AuditResults({
           {summary}
         </p>
       </div>
-      {highSavings && (
-        <div className="mt-10 rounded-[2rem] border border-[#C9ADA7]/20 bg-[#C9ADA7]/10 p-10 text-center backdrop-blur-2xl">
-          <div className="text-sm uppercase tracking-wide text-[#C9ADA7]">
-            High-impact optimization opportunity
-          </div>
-
-          <h2 className="mt-4 text-3xl font-semibold text-[#F2E9E4]">
-            Your team could potentially save over $
-            {result.estimatedMonthlySavings}
-            /month
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl leading-8 text-[#B8AAA4]">
-            Teams with high AI infrastructure spend often uncover additional savings through centralized procurement, credit optimization, and vendor consolidation strategies.
-          </p>
-
-          <button className="mt-8 rounded-full bg-[#C9ADA7] px-8 py-4 text-black transition-all duration-300 hover:scale-[1.02] hover:bg-[#dcc2bc]">
-            Book Credex Consultation
-          </button>
-        </div>
-      )}
-      {lowSavings && (
-        <div className="mt-10 rounded-[2rem] border border-green-500/20 bg-green-500/5 p-10 text-center backdrop-blur-2xl">
-          <div className="text-sm uppercase tracking-wide text-green-300">
-            Efficient stack detected
-          </div>
-
-          <h2 className="mt-4 text-3xl font-semibold text-[#F2E9E4]">
-            Your AI spend already appears relatively optimized
-          </h2>
-
-          <p className="mx-auto mt-5 max-w-2xl leading-8 text-[#B8AAA4]">
-            TokenGuard identified limited immediate savings opportunities based on your current tooling allocation and pricing structure.
-          </p>
-
-          <button className="mt-8 rounded-full border border-white/10 bg-white/5 px-8 py-4 text-[#F2E9E4] transition-all duration-300 hover:bg-white/10">
-            Notify Me About Future Optimizations
-          </button>
-        </div>
-      )}
       <div className="mt-16">
         <h2 className="text-3xl font-semibold tracking-tight text-[#F2E9E4]">
           Optimization recommendations
@@ -201,7 +147,7 @@ export function AuditResults({
                 <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
                   <div>
                     <div className="text-sm uppercase tracking-wide opacity-70">
-                      {recommendation.severity} priority
+                      {recommendation.severity} priority · {recommendation.confidence === "verified" ? "counted saving" : "requires review"}
                     </div>
 
                     <h3 className="mt-3 text-2xl font-semibold">
@@ -213,6 +159,7 @@ export function AuditResults({
                         recommendation.description
                       }
                     </p>
+                    <p className="mt-4 max-w-3xl text-sm leading-6 opacity-90"><span className="font-semibold">Next step:</span> {recommendation.action}</p>
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-center">
@@ -221,10 +168,7 @@ export function AuditResults({
                     </div>
 
                     <div className="mt-2 text-3xl font-semibold text-[#F2E9E4]">
-                      $
-                      {
-                        recommendation.estimatedSavings
-                      }
+                      ${recommendation.estimatedSavings.toFixed(2)}
                     </div>
                   </div>
                 </div>
@@ -232,6 +176,11 @@ export function AuditResults({
             )
           )}
         </div>
+      </div>
+      <div className="mt-12 rounded-[2rem] border border-white/10 bg-black/20 p-7 text-sm text-[#B8AAA4]">
+        <p className="font-medium text-[#F2E9E4]">Price sources & scope</p>
+        <p className="mt-2 leading-6">Public USD list prices last reviewed July 21, 2026. Taxes, regional pricing, credits, negotiated contracts, and API token billing are excluded unless included in your invoice subtotal.</p>
+        <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">{Object.values(pricingData).map((tool) => <a key={tool.name} href={tool.website} target="_blank" rel="noreferrer" className="text-[#C9ADA7] underline underline-offset-4">{tool.sourceLabel} ↗</a>)}</div>
       </div>
       <LeadCapture
           auditResult={result}

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { pricingData } from "@/lib/pricing-data";
+import { monthlyCost } from "@/lib/audit-engine";
 import { Button } from "@/components/ui/button";
 
 interface ReviewStepProps {
@@ -11,7 +12,7 @@ interface ReviewStepProps {
   tools: {
     toolId: string;
     planId: string;
-    monthlySpend: number;
+    monthlySpend?: number;
     seats: number;
   }[];
 
@@ -28,7 +29,7 @@ export function ReviewStep({
 }: ReviewStepProps) {
   const totalMonthlySpend = tools.reduce(
     (acc, tool) =>
-      acc + tool.monthlySpend,
+      acc + monthlyCost(tool),
     0
   );
 
@@ -82,7 +83,7 @@ export function ReviewStep({
             </div>
 
             <div className="mt-3 text-3xl font-semibold text-[#F2E9E4]">
-              ${totalMonthlySpend}
+              ${totalMonthlySpend.toFixed(2)}
             </div>
           </div>
         </div>
@@ -131,7 +132,7 @@ export function ReviewStep({
                   </div>
 
                   <div className="text-2xl font-semibold text-[#C9ADA7]">
-                    ${tool.monthlySpend}/mo
+                    ${monthlyCost(tool).toFixed(2)}/mo
                   </div>
                 </motion.div>
               );
@@ -144,7 +145,7 @@ export function ReviewStep({
           </div>
 
           <div className="mt-4 text-5xl font-semibold tracking-tight text-[#F2E9E4]">
-            ${annualSpend}
+            ${annualSpend.toFixed(2)}
           </div>
         </div>
         <div className="mt-14 flex items-center justify-between">

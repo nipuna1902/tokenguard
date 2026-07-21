@@ -2,13 +2,15 @@
 
 import { motion } from "framer-motion";
 import { pricingData } from "@/lib/pricing-data";
+import { monthlyCost } from "@/lib/audit-engine";
+import { auditToolInputSchema } from "@/lib/audit-validation";
 import { Button } from "@/components/ui/button";
 
 interface ToolSelectionStepProps {
   tools: {
     toolId: string;
     planId: string;
-    monthlySpend: number;
+    monthlySpend?: number;
     seats: number;
   }[];
 
@@ -17,7 +19,7 @@ interface ToolSelectionStepProps {
       {
         toolId: string;
         planId: string;
-        monthlySpend: number;
+        monthlySpend?: number;
         seats: number;
       }[]
     >
@@ -39,8 +41,7 @@ export function ToolSelectionStep({
       {
         toolId: "",
         planId: "",
-        monthlySpend: 0,
-        seats: 1,
+      seats: 1,
       },
     ]);
   };
@@ -54,7 +55,7 @@ export function ToolSelectionStep({
   const updateTool = (
     index: number,
     field: string,
-    value: string | number
+    value: string | number | undefined
   ) => {
     const updatedTools = [...tools];
 
@@ -66,13 +67,7 @@ export function ToolSelectionStep({
     setTools(updatedTools);
   };
 
-  const isFormValid = tools.every(
-    (tool) =>
-      tool.toolId &&
-      tool.planId &&
-      tool.monthlySpend > 0 &&
-      tool.seats > 0
-  );
+  const isFormValid = tools.every((tool) => auditToolInputSchema.safeParse(tool).success);
 
   return (
     <motion.div
@@ -123,13 +118,12 @@ export function ToolSelectionStep({
 
                     <select
                       value={tool.toolId}
-                      onChange={(e) =>
-                        updateTool(
-                          index,
-                          "toolId",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => {
+                        const firstPlan = pricingData[e.target.value as keyof typeof pricingData]?.plans[0];
+                        const updatedTools = [...tools];
+                        updatedTools[index] = { ...tool, toolId: e.target.value, planId: firstPlan?.id ?? "", monthlySpend: undefined };
+                        setTools(updatedTools);
+                      }}
                       className="h-14 w-full rounded-2xl border border-white/10 bg-black/30 px-4 text-[#F2E9E4] outline-none transition-all duration-300 focus:border-[#C9ADA7]/40"
                     >
                       <option value="">
@@ -155,13 +149,7 @@ export function ToolSelectionStep({
 
                     <select
                       value={tool.planId}
-                      onChange={(e) =>
-                        updateTool(
-                          index,
-                          "planId",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => updateTool(index, "planId", e.target.value)}
                       className="h-14 w-full rounded-2xl border border-white/10 bg-black/30 px-4 text-[#F2E9E4] outline-none transition-all duration-300 focus:border-[#C9ADA7]/40"
                     >
                       <option value="">
@@ -182,21 +170,19 @@ export function ToolSelectionStep({
                   </div>
                   <div>
                     <label className="mb-2 block text-sm text-[#C9ADA7]">
-                      Monthly spend ($)
+                      Invoice subtotal ($, optional)
                     </label>
 
                     <input
                       type="number"
-                      value={
-                        tool.monthlySpend || ""
-                      }
+                      min="0"
+                      step="0.01"
+                      value={tool.monthlySpend ?? ""}
                       onChange={(e) =>
                         updateTool(
                           index,
                           "monthlySpend",
-                          Number(
-                            e.target.value
-                          )
+                          e.target.value === "" ? undefined : Number(e.target.value)
                         )
                       }
                       className="h-14 w-full rounded-2xl border border-white/10 bg-black/30 px-4 text-[#F2E9E4] outline-none transition-all duration-300 focus:border-[#C9ADA7]/40"
@@ -209,6 +195,8 @@ export function ToolSelectionStep({
 
                     <input
                       type="number"
+                      min="1"
+                      step="1"
                       value={tool.seats}
                       onChange={(e) =>
                         updateTool(
@@ -223,6 +211,13 @@ export function ToolSelectionStep({
                     />
                   </div>
                 </div>
+
+                {selectedTool && tool.planId && (
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/[0.03] px-4 py-3 text-sm text-[#B8AAA4]">
+                    <span>Audit basis: <strong className="font-medium text-[#F2E9E4]">${monthlyCost(tool).toFixed(2)}/mo</strong> {tool.monthlySpend ? "from invoice" : "from public list price × seats"}</span>
+                    <a href={selectedTool.website} target="_blank" rel="noreferrer" className="text-[#C9ADA7] underline underline-offset-4">Verify {selectedTool.sourceLabel} ↗</a>
+                  </div>
+                )}
 
                 <button
                   onClick={() =>
@@ -265,7 +260,7 @@ export function ToolSelectionStep({
 
         {!isFormValid && (
           <p className="mt-5 text-sm text-[#8D817C]">
-            Please complete all fields before continuing.
+            Please select a tool, a plan, and a valid seat count. Invoice-based entries also need a recent monthly subtotal.
           </p>
         )}
       </div>

@@ -2,24 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { PrimaryUseCase, primaryUseCases } from "@/types/audit";
 
 interface TeamProfileStepProps {
   teamSize: number;
   setTeamSize: (value: number) => void;
 
   primaryUseCase: string;
-  setPrimaryUseCase: (value: string) => void;
+  setPrimaryUseCase: (value: PrimaryUseCase) => void;
 
   onNext: () => void;
 }
-
-const useCases = [
-  "Coding",
-  "Writing",
-  "Research",
-  "Data Analysis",
-  "Mixed Workloads",
-];
 
 export function TeamProfileStep({
   teamSize,
@@ -73,7 +66,7 @@ export function TeamProfileStep({
           </label>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            {useCases.map((useCase) => {
+            {primaryUseCases.map((useCase) => {
               const active =
                 primaryUseCase === useCase;
 

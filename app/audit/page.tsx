@@ -12,9 +12,17 @@ import { ReviewStep } from "@/components/audit/review-step";
 import { AuditResults } from "@/components/audit/audit-results";
 
 import { generateAudit } from "@/lib/audit-engine";
+import { auditSessionSchema } from "@/lib/audit-validation";
+import { AuditResult, AuditToolInput, PrimaryUseCase } from "@/types/audit";
 
 const STORAGE_KEY =
   "tokenguard-audit-session";
+
+const emptyTool: AuditToolInput = {
+  toolId: "",
+  planId: "",
+  seats: 1,
+};
 
 export default function AuditPage() {
   const [currentStep, setCurrentStep] =
@@ -24,19 +32,14 @@ export default function AuditPage() {
     useState(0);
 
   const [primaryUseCase, setPrimaryUseCase] =
-    useState("");
+    useState<PrimaryUseCase | "">("");
 
-  const [tools, setTools] = useState([
-    {
-      toolId: "",
-      planId: "",
-      monthlySpend: 0,
-      seats: 1,
-    },
+  const [tools, setTools] = useState<AuditToolInput[]>([
+    emptyTool,
   ]);
 
   const [auditResult, setAuditResult] =
-    useState<any>(null);
+    useState<AuditResult | null>(null);
 
   const [aiSummary, setAiSummary] =
     useState("");
@@ -49,39 +52,66 @@ export default function AuditPage() {
 
     if (!savedSession) return;
 
+    let parsedSession: unknown;
+
+    try {
+      parsedSession =
+        JSON.parse(savedSession);
+    } catch {
+      localStorage.removeItem(
+        STORAGE_KEY
+      );
+      return;
+    }
+
     const parsed =
-      JSON.parse(savedSession);
+      auditSessionSchema.safeParse(
+        parsedSession
+      );
 
-    setCurrentStep(
-      parsed.currentStep || 1
-    );
+    if (!parsed.success) {
+      localStorage.removeItem(
+        STORAGE_KEY
+      );
+      return;
+    }
 
-    setTeamSize(
-      parsed.teamSize || 0
-    );
+    const session =
+      parsed.data;
 
-    setPrimaryUseCase(
-      parsed.primaryUseCase || ""
-    );
+    const restoreTimer =
+      window.setTimeout(() => {
+        setCurrentStep(
+          session.currentStep
+        );
 
-    setTools(
-      parsed.tools || [
-        {
-          toolId: "",
-          planId: "",
-          monthlySpend: 0,
-          seats: 1,
-        },
-      ]
-    );
+        setTeamSize(
+          session.teamSize
+        );
 
-    setAuditResult(
-      parsed.auditResult || null
-    );
+        setPrimaryUseCase(
+          session.primaryUseCase
+        );
 
-    setAiSummary(
-      parsed.aiSummary || ""
-    );
+        setTools(
+          session.tools.length
+            ? session.tools
+            : [emptyTool]
+        );
+
+        setAuditResult(
+          session.auditResult
+        );
+
+        setAiSummary(
+          session.aiSummary
+        );
+      }, 0);
+
+    return () =>
+      window.clearTimeout(
+        restoreTimer
+      );
   }, []);
 
   useEffect(() => {
@@ -119,12 +149,7 @@ export default function AuditPage() {
     setPrimaryUseCase("");
 
     setTools([
-      {
-        toolId: "",
-        planId: "",
-        monthlySpend: 0,
-        seats: 1,
-      },
+      emptyTool,
     ]);
 
     setAuditResult(null);
@@ -187,7 +212,7 @@ export default function AuditPage() {
                     generateAudit({
                       teamSize,
                       primaryUseCase:
-                        primaryUseCase as any,
+                        primaryUseCase as PrimaryUseCase,
                       tools,
                     });
 
