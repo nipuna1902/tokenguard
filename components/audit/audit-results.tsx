@@ -57,7 +57,7 @@ export function AuditResults({
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#B8AAA4]">
-          Recommendations are based on the plan prices shown below and the invoice totals you supplied. We only total savings that can be checked from seat counts; usage and contract changes are clearly marked for review.
+          Recommendations are based on the plan prices shown below and the invoice totals you supplied. We only total savings that can be checked from paid-entitlement counts; usage and contract changes are clearly marked for review.
         </p>
       </div>
       <div className="mt-16 grid gap-6 md:grid-cols-3">

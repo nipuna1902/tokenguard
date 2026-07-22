@@ -1,5 +1,5 @@
 import { AuditFormData, AuditRecommendation, AuditResult } from "@/types/audit";
-import { getPlan, pricingData, ToolId } from "./pricing-data";
+import { getPlan, pricingData, ToolId, ToolOverlapGroup } from "./pricing-data";
 import { auditFormDataSchema } from "./audit-validation";
 
 const roundMoney = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
@@ -19,10 +19,16 @@ function estimatePlanChangeSavings(
   return Math.min(spend, roundMoney((currentMonthlyPrice - targetMonthlyPrice) * seats));
 }
 
-function cheapestPlanForTier(toolId: string, tiers: string[]) {
+function cheapestPlanForTier(toolId: string, tiers: string[], billingCadence: "monthly" | "annual") {
   return pricingData[toolId as ToolId]?.plans
-    .filter((plan) => !plan.requiresQuote && tiers.includes(plan.tier))
+    .filter((plan) => !plan.requiresQuote && plan.canBeDowngradeTarget !== false && plan.billingCadence === billingCadence && tiers.includes(plan.tier))
     .sort((a, b) => a.monthlyPrice - b.monthlyPrice)[0];
+}
+
+function toolsInOverlapGroup(data: AuditFormData, overlapGroup: ToolOverlapGroup) {
+  return data.tools.filter((tool) =>
+    pricingData[tool.toolId as ToolId]?.overlapGroup === overlapGroup && monthlyCost(tool) > 0
+  );
 }
 
 export function generateAudit(data: AuditFormData): AuditResult {
@@ -74,17 +80,18 @@ export function generateAudit(data: AuditFormData): AuditResult {
 
     const listBaseCost = roundMoney(currentPlan.monthlyPrice * tool.seats);
 
-    // A seat count above the stated user population is the only saving we can
-    // calculate without guessing about feature usage. It is capped by invoice spend.
+    // A paid-seat or paid-account count above the stated user population is the
+    // only saving we can calculate without guessing about feature usage.
     if (tool.seats > data.teamSize && currentPlan.monthlyPrice > 0) {
       const unusedSeats = tool.seats - data.teamSize;
+      const unitLabel = currentPlan.billingUnit === "account" ? "paid account" : "seat";
       const saving = Math.min(spend, roundMoney(unusedSeats * currentPlan.monthlyPrice));
       if (saving > 0) {
         recommendations.push({
           tool: toolData.name, severity: "high", confidence: "verified",
-          title: `${unusedSeats} seat${unusedSeats === 1 ? "" : "s"} exceed your stated team size`,
-          description: `Your selected ${currentPlan.name} plan lists ${tool.seats} seats for a ${data.teamSize}-person team. This is a count check, not a claim that every extra seat is inactive.`,
-          action: "Export the vendor seat roster, confirm owners, then remove or reassign inactive seats before renewal.",
+          title: `${unusedSeats} ${unitLabel}${unusedSeats === 1 ? "" : "s"} exceed your stated team size`,
+          description: `Your selected ${currentPlan.name} plan lists ${tool.seats} ${unitLabel}${tool.seats === 1 ? "" : "s"} for a ${data.teamSize}-person team. This is a count check, not a claim that every extra entitlement is inactive.`,
+          action: "Export the vendor roster, confirm owners, then remove or reassign inactive entitlements before renewal.",
           estimatedSavings: saving,
         });
         verifiedSavings += saving;
@@ -92,14 +99,15 @@ export function generateAudit(data: AuditFormData): AuditResult {
     }
 
     if (currentPlan.tier === "premium") {
-      const targetPlan = cheapestPlanForTier(tool.toolId, ["team", "individual"]);
+      const targetPlan = cheapestPlanForTier(tool.toolId, ["team", "individual"], currentPlan.billingCadence);
       if (targetPlan && targetPlan.monthlyPrice < currentPlan.monthlyPrice) {
+        const priceUnit = currentPlan.billingUnit === "account" ? "account" : "seat";
         const saving = estimatePlanChangeSavings(spend, currentPlan.monthlyPrice, targetPlan.monthlyPrice, tool.seats);
         if (saving > 0) {
           recommendations.push({
             tool: toolData.name, severity: "medium", confidence: "review",
             title: `${currentPlan.name} should be justified with usage data`,
-            description: `${targetPlan.name} is listed at $${targetPlan.monthlyPrice}/seat/month versus $${currentPlan.monthlyPrice} for the selected premium plan. The lower plan may be enough for users without heavy agent, premium-model, or compliance requirements.`,
+            description: `${targetPlan.name} is listed at $${targetPlan.monthlyPrice}/${priceUnit}/month versus $${currentPlan.monthlyPrice} for the selected premium plan. The lower plan may be enough for users without premium capacity, workflow, privacy, or governance requirements.`,
             action: "Segment users by 30-day active usage and move low-intensity users to the lower plan only after confirming required features.",
             estimatedSavings: saving,
           });
@@ -109,7 +117,7 @@ export function generateAudit(data: AuditFormData): AuditResult {
     }
 
     if (currentPlan.tier === "team" && data.teamSize <= 2) {
-      const individualPlan = cheapestPlanForTier(tool.toolId, ["individual"]);
+      const individualPlan = cheapestPlanForTier(tool.toolId, ["individual"], currentPlan.billingCadence);
       if (individualPlan && individualPlan.monthlyPrice < currentPlan.monthlyPrice) {
         const saving = estimatePlanChangeSavings(spend, currentPlan.monthlyPrice, individualPlan.monthlyPrice, tool.seats);
         if (saving > 0) {
@@ -125,14 +133,17 @@ export function generateAudit(data: AuditFormData): AuditResult {
       }
     }
 
-    const annualAlternative = toolData.plans.find((plan) => plan.tier === currentPlan.tier && plan.billingCadence === "annual" && plan.monthlyPrice < currentPlan.monthlyPrice);
+    const annualAlternative = currentPlan.annualAlternativePlanId
+      ? toolData.plans.find((plan) => plan.id === currentPlan.annualAlternativePlanId && plan.billingCadence === "annual" && plan.monthlyPrice < currentPlan.monthlyPrice)
+      : toolData.plans.find((plan) => plan.tier === currentPlan.tier && plan.billingCadence === "annual" && plan.monthlyPrice < currentPlan.monthlyPrice);
     if (annualAlternative) {
+      const priceUnit = currentPlan.billingUnit === "account" ? "account" : "seat";
       const saving = Math.min(spend, roundMoney((currentPlan.monthlyPrice - annualAlternative.monthlyPrice) * tool.seats));
       if (saving > 0) {
         recommendations.push({
           tool: toolData.name, severity: "medium", confidence: "review",
-          title: "Annual billing could reduce the per-seat rate",
-          description: `${annualAlternative.name} is listed at $${annualAlternative.monthlyPrice}/seat/month equivalent versus $${currentPlan.monthlyPrice} on your selected plan. Confirm contract flexibility and renewal terms first.`,
+          title: "Annual billing could reduce the monthly-equivalent rate",
+          description: `${annualAlternative.name} is listed at $${annualAlternative.monthlyPrice}/${priceUnit}/month equivalent versus $${currentPlan.monthlyPrice} on your selected plan. Confirm contract flexibility and renewal terms first.`,
           action: "Request the annual quote and compare its total commitment with the trailing 12 months of active seats.",
           estimatedSavings: saving,
         });
@@ -145,13 +156,13 @@ export function generateAudit(data: AuditFormData): AuditResult {
         tool: toolData.name, severity: "medium", confidence: "review",
         title: "Invoice spend exceeds the public base plan cost",
         description: `Your entered invoice is $${roundMoney(tool.monthlySpend - listBaseCost)} above the current base list price. This can come from overages, add-ons, taxes, credits, or regional pricing, so it is not included in verified savings.`,
-        action: "Set vendor spend caps, review model/agent usage by user, and move repetitive work to lower-cost approved models where quality permits.",
+        action: "Review vendor usage, add-ons, and seat allocation by user; set budget or usage controls where the vendor supports them.",
         estimatedSavings: 0,
       });
     }
   }
 
-  const codingTools = data.tools.filter((tool) => ["cursor", "copilot"].includes(tool.toolId));
+  const codingTools = toolsInOverlapGroup(data, "coding");
   if (codingTools.length > 1) {
     const overlapSaving = Math.min(...codingTools.map(monthlyCost));
     recommendations.push({
@@ -164,7 +175,7 @@ export function generateAudit(data: AuditFormData): AuditResult {
     reviewableSavings += overlapSaving;
   }
 
-  const knowledgeTools = data.tools.filter((tool) => ["chatgpt", "claude", "gemini"].includes(tool.toolId) && monthlyCost(tool) > 0);
+  const knowledgeTools = toolsInOverlapGroup(data, "general-assistant");
   if (knowledgeTools.length > 1 && ["Writing", "Research", "Data Analysis", "Mixed Workloads"].includes(data.primaryUseCase)) {
     const overlapSaving = Math.min(...knowledgeTools.map(monthlyCost));
     recommendations.push({

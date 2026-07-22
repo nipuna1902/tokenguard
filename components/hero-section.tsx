@@ -59,6 +59,10 @@ export function HeroSection() {
           <span>Copilot</span>
           <span>•</span>
           <span>Gemini</span>
+          <span>•</span>
+          <span>Notion AI</span>
+          <span>•</span>
+          <span>Midjourney</span>
         </div>
         </FadeIn>
       </div>

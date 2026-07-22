@@ -37,7 +37,7 @@ export function HowItWorks() {
           </h2>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#9A8C98]">
-            TokenGuard helps startup teams uncover hidden inefficiencies across AI subscriptions, seats, and API usage in just a few minutes.
+            TokenGuard helps startup teams uncover hidden inefficiencies across AI subscriptions, paid accounts, and API usage in just a few minutes.
           </p>
         </div>
 

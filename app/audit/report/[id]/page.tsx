@@ -225,6 +225,7 @@ export default async function ReportPage({
                       tool.toolId,
                       tool.planId
                     );
+                  const quantityLabel = selectedPlan?.billingUnit === "account" ? "Paid accounts" : "Seats";
 
                   return (
                     <div
@@ -246,7 +247,7 @@ export default async function ReportPage({
                       </div>
 
                       <div className="mt-1 text-[#8D817C]">
-                        Seats:{" "}
+                        {quantityLabel}:{" "}
                         {tool.seats}
                       </div>
                     </div>

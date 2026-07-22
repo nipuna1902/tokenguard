@@ -14,8 +14,8 @@ function fallbackSummary(
 ) {
   const verifiedSavings =
     auditResult.estimatedMonthlySavings > 0
-      ? `Verified savings are estimated at $${auditResult.estimatedMonthlySavings.toFixed(2)} per month based on directly checkable seat counts.`
-      : "No automatically verified savings were identified from the supplied seat and plan data.";
+      ? `Verified savings are estimated at $${auditResult.estimatedMonthlySavings.toFixed(2)} per month based on directly checkable paid-entitlement counts.`
+      : "No automatically verified savings were identified from the supplied plan and entitlement data.";
 
   const reviewableSavings =
     auditResult.reviewableMonthlySavings > 0

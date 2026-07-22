@@ -96,6 +96,10 @@ export function ToolSelectionStep({
               pricingData[
                 tool.toolId as keyof typeof pricingData
               ];
+            const selectedPlan = selectedTool?.plans.find(
+              (plan) => plan.id === tool.planId
+            );
+            const quantityLabel = selectedPlan?.billingUnit === "account" ? "Paid accounts" : "Seats";
 
             return (
               <motion.div
@@ -190,7 +194,7 @@ export function ToolSelectionStep({
                   </div>
                   <div>
                     <label className="mb-2 block text-sm text-[#C9ADA7]">
-                      Seats
+                      {quantityLabel}
                     </label>
 
                     <input
@@ -214,9 +218,12 @@ export function ToolSelectionStep({
 
                 {selectedTool && tool.planId && (
                   <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/[0.03] px-4 py-3 text-sm text-[#B8AAA4]">
-                    <span>Audit basis: <strong className="font-medium text-[#F2E9E4]">${monthlyCost(tool).toFixed(2)}/mo</strong> {tool.monthlySpend ? "from invoice" : "from public list price × seats"}</span>
+                    <span>Audit basis: <strong className="font-medium text-[#F2E9E4]">${monthlyCost(tool).toFixed(2)}/mo</strong> {tool.monthlySpend ? "from invoice" : `from public list price × ${quantityLabel.toLowerCase()}`}</span>
                     <a href={selectedTool.website} target="_blank" rel="noreferrer" className="text-[#C9ADA7] underline underline-offset-4">Verify {selectedTool.sourceLabel} ↗</a>
                   </div>
+                )}
+                {selectedTool?.pricingNote && tool.planId && (
+                  <p className="mt-3 text-sm leading-6 text-[#8D817C]">{selectedTool.pricingNote}</p>
                 )}
 
                 <button
@@ -260,7 +267,7 @@ export function ToolSelectionStep({
 
         {!isFormValid && (
           <p className="mt-5 text-sm text-[#8D817C]">
-            Please select a tool, a plan, and a valid seat count. Invoice-based entries also need a recent monthly subtotal.
+            Please select a tool, a plan, and a valid quantity. Invoice-based entries also need a recent monthly subtotal.
           </p>
         )}
       </div>

@@ -1,163 +1,124 @@
-# METRICS.md
+# Product metrics and learning plan
 
-# North Star Metric
+> **Status:** no analytics events, dashboard, CRM, email webhooks, or realized-savings tracking are implemented in the current code. This document defines a measurement plan; it does not report actual TokenGuard metrics.
 
-## Saved Audit Reports Per Week
+## Measurement principle
 
-The primary North Star metric for TokenGuard is:
+TokenGuard should optimize for **trusted action**, not a flashy saving estimate or a daily-active-user number. A one-off audit product can have low daily frequency and still be valuable if it helps an accountable owner make a correct renewal, entitlement, or consolidation decision.
 
-# the number of audit reports successfully saved per week.
+## Proposed North Star
 
-This metric is more meaningful than simple page views or daily active users because TokenGuard is fundamentally a lead-generation and operational finance qualification tool rather than a high-frequency engagement product.
+> **Evidence-backed optimization actions per month**
 
-A saved report indicates that a user:
+An action counts only when a user records a recommendation, attaches or references validating evidence (for example, an invoice or seat roster), assigns an owner, and reports an outcome or reason for rejection.
 
-- completed the onboarding flow,
-- found value in the audit,
-- trusted the output enough to preserve it,
-- and was willing to exchange contact information after seeing value first.
+This metric is not available today. Until an action ledger exists, use two clearly labeled proxy metrics:
 
-That makes it a strong proxy for:
+1. **Valid audit completions** — user reaches a Zod-valid deterministic result.
+2. **Saved reports** — Supabase insert succeeds after lead capture.
 
-- product usefulness,
-- lead quality,
-- and business intent.
+Neither proxy proves actual savings, trust, or revenue.
 
----
+## Funnel metrics
 
-# Why Not DAU?
+| Stage | Event / definition | Formula | Why it matters | Current status |
+| --- | --- | --- | --- | --- |
+| Qualified visit | Landing view from intended segment/channel | Count | Separates useful traffic from vanity traffic. | Not instrumented |
+| Audit start | First meaningful interaction on `/audit` | `starts / qualified visits` | Tests problem/message relevance. | Not instrumented |
+| Valid audit | `generateAudit` receives a valid form | `valid audits / starts` | Tests onboarding and data availability. | Not instrumented |
+| Summary response | Summary endpoint returns provider/fallback response | `summary responses / valid audits` | Detects route/provider health. | Not instrumented |
+| Report-save attempt | Valid email submission attempt | `save attempts / valid audits` | Tests willingness to preserve/share result. | Not instrumented |
+| Report saved | Supabase insert returns an ID | `saved reports / save attempts` | Detects RLS/schema/config failures. | Partially observable in Supabase logs |
+| Email accepted | Resend send call returns success | `accepted emails / saved reports` | Detects route/sender failure. | Partially observable in Resend |
+| Public report view | A report URL renders | `report views / saved reports` | Measures sharing/return behavior. | Not instrumented |
+| Evidence-backed action | Recommendation has evidence and an outcome | `actions / valid audits` | Measures real value. | Not implemented |
+| Realized saving | Invoice/contract confirms change | `realized savings / candidate savings` | Calibrates recommendation quality. | Not implemented |
 
-Daily Active Users would be misleading for this product because AI infrastructure audits are not workflows users perform every day.
+## Trust and precision metrics
 
-Most startups would likely:
+Financial recommendation quality needs its own scorecard; conversion alone can reward exaggeration.
 
-- run audits occasionally,
-- revisit reports during budgeting cycles,
-- or return after major tooling/pricing changes.
+| Metric | Definition | Desired interpretation |
+| --- | --- | --- |
+| Verified recommendation confirmation rate | `verified recommendations confirmed by roster / verified recommendations reviewed` | Tests whether the team-size proxy is sufficiently conservative. |
+| Review recommendation action rate | `review items acted on / review items shown` | Finds useful investigation prompts. |
+| Review false-positive rate | `review items rejected as unsuitable / review items reviewed` | Shows where feature/contract/context rules are too broad. |
+| Gross-to-realized ratio | `realized savings / gross reviewable estimate` | Makes non-additive review totals visible; should not be used as a promise. |
+| Forecast error | Error between forecast and actual spend over time | Not meaningful until time-series forecasting exists. |
+| Price freshness | Days since each catalog source was reviewed | Protects public-price credibility. |
+| Report reproducibility rate | Saved reports that can be recreated from stored price/rule snapshot | Requires snapshot storage; currently not measurable. |
 
-As a result, maximizing repeat daily usage is less important than generating high-quality completed audits from relevant technical teams.
+## Event design
 
----
+Instrument events through a privacy-aware server or analytics layer. Do not send raw email addresses, invoice subtotals, full report payloads, or secret keys to an analytics vendor by default.
 
-# Input Metrics That Drive the North Star
+| Event | Minimal properties | Never include by default |
+| --- | --- | --- |
+| `audit_started` | anonymous session ID, entry source, app version | Email, company, invoice amount |
+| `audit_validated` | number of tools, use case, catalog version, validation outcome | Tool-level spend, full form data |
+| `audit_generated` | verified/review counts, zero/non-zero buckets, rule version | Exact financial values unless consented/aggregated |
+| `summary_completed` | provider/fallback flag, status class, duration bucket | Prompt/payload, API key |
+| `report_save_attempted` | anonymous session ID, outcome/error category | Email address, raw Supabase response |
+| `report_saved` | report ID hash, catalog/rule version | PII or full audit payload |
+| `email_requested` | success/error category, sender configuration flag | Recipient email, email HTML |
+| `public_report_viewed` | report ID hash, referrer class | Full URL query data or PII |
+| `recommendation_outcome` | rule ID, accepted/rejected/deferred, evidence type | Sensitive invoice/contract contents |
 
-## 1. Audit Completion Rate
+Use a random first-party session identifier, document consent, and define data retention before enabling analytics. The current public report/RLS risk must be resolved before treating analytics as a substitute for privacy controls.
 
-Definition:
+## Dashboard views to build
 
-```txt
-Visitors who finish the onboarding flow ÷ total landing page visitors
-```
+### Product health
 
-This measures:
+- Visitor → start → valid audit → save funnel by channel and device.
+- Form validation failure categories and abandon step.
+- Summary fallback/error rate and route latency.
+- Supabase insert failure rate by error category.
+- Email acceptance, delivery, bounce, and complaint rate.
 
-- onboarding clarity,
-- friction reduction,
-- UX effectiveness,
-- and perceived value proposition strength.
+### Recommendation quality
 
-A low completion rate would indicate:
+- Distribution of verified vs review-only outputs.
+- Zero-safe-saving rate by segment/use case.
+- Recommendation confirmation, rejection, and action rate by rule.
+- Gross reviewable amount versus confirmed realized amount.
+- Price catalog version/review age used by audits.
 
-- confusing onboarding,
-- excessive form complexity,
-- or weak perceived value.
+### Commercial learning
 
----
+- Qualified lead rate and reason for qualification.
+- Follow-up request rate after saved report.
+- Time from audit to action/renewal decision.
+- Cohorts that return around a renewal or budget event.
+- Support time and data-collection friction per useful audit.
 
-## 2. Report Save Rate
+## Alert conditions
 
-Definition:
+Start with simple operational alerts, then calibrate thresholds using baseline data:
 
-```txt
-Users who save reports ÷ completed audits
-```
+| Signal | Possible meaning | First response |
+| --- | --- | --- |
+| Sudden rise in audit validation failures | Price catalog/UI mismatch or malformed traffic | Inspect recent catalog/form changes and error categories. |
+| Summary fallback spike | Gemini key/quota/provider outage | Verify provider dashboard; preserve deterministic audit path. |
+| Save failure spike | Supabase/RLS/schema/config regression | Stop collecting leads until data path is verified. |
+| Email failure/bounce spike | Sender/domain/provider or bad data | Pause sends, check Resend and validation. |
+| High report saves but low action confirmation | Curiosity without trust/actionability | Collect direct user feedback; improve evidence capture rather than headline copy. |
+| High review false-positive rate | Rules too broad or missing governance context | Tighten rules, collect evidence, avoid inflating gross totals. |
+| Stale pricing snapshot | Price credibility risk | Review sources and release a catalog update. |
 
-This measures:
+## Experiment design rules
 
-- trust in audit quality,
-- perceived usefulness,
-- and lead capture effectiveness.
+- State one hypothesis, one audience, one primary metric, and one guardrail metric.
+- Measure behavior (completed audit, evidence supplied, action), not only clicks or stated intent.
+- Keep a control/baseline when changing saving language or confidence labels.
+- Segment results by data availability and buyer role; an average can hide a broken workflow.
+- Do not optimize report-save conversion by obscuring privacy or overstating savings.
+- Log catalog/rule version with each aggregate event so a pricing change cannot masquerade as a product improvement.
 
-Because the email gate appears only after value is shown, this metric is particularly important for evaluating whether the audit output itself feels compelling.
+## Initial instrumentation sequence
 
----
-
-## 3. Shareable Report Clickthroughs
-
-Definition:
-
-```txt
-Visits generated from shared audit URLs
-```
-
-This measures:
-
-- virality,
-- screenshot-worthiness,
-- and social sharing behavior.
-
-The public report system is intentionally designed as a distribution loop rather than only a reporting feature.
-
----
-
-# First Instrumentation Priorities
-
-If TokenGuard were deployed in production, the first events I would instrument are:
-
-- Landing page visits
-- Audit started
-- Audit completed
-- Report saved
-- Shareable report viewed
-- Consultation CTA clicked
-- Transactional email opened
-- Shared report referral traffic
-
-These events would help identify:
-
-- onboarding dropoff points,
-- conversion bottlenecks,
-- and the strongest acquisition channels.
-
----
-
-# Metrics That Would Trigger a Pivot
-
-A major concern would be:
-
-# low report save rates despite high audit completion.
-
-For example:
-
-```txt
-> 20% audit completion
-< 5% report saves
-```
-
-This would likely indicate that:
-
-- the audit recommendations are not trusted,
-- the savings opportunities are not compelling,
-- or the product is not perceived as operationally useful enough to exchange contact information for.
-
-In that scenario, I would likely pivot toward:
-
-- benchmarking,
-- AI infrastructure analytics,
-- or collaborative procurement tooling
-
-instead of purely optimization-focused audits.
-
----
-
-# Success Signals
-
-Strong early-stage validation would look like:
-
-- 20%+ audit completion rate
-- 25%+ report save rate
-- Meaningful organic traffic from shared report URLs
-- Multiple startups voluntarily sharing audit screenshots publicly
-- Repeat usage after pricing changes or tooling expansion
-
-Those signals would suggest that TokenGuard is functioning not only as a calculator, but as a credible operational finance workflow for AI infrastructure management.
+1. Add a privacy-reviewed first-party event layer for audit start, validation, result generation, save success/failure, and summary fallback.
+2. Add server-side report creation with a correlation ID, then record only safe operational metadata.
+3. Capture email delivery webhooks and a report-revocation/deletion event.
+4. Add an action ledger with evidence type, owner, status, and realized outcome.
+5. Add pricing/rule snapshots and quality dashboards before attempting forecast metrics.

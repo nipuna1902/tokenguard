@@ -104,6 +104,7 @@ export function ReviewStep({
                   (plan) =>
                     plan.id === tool.planId
                 );
+              const quantityLabel = selectedPlan?.billingUnit === "account" ? "paid account" : "seat";
 
               return (
                 <motion.div
@@ -127,7 +128,7 @@ export function ReviewStep({
                     </div>
 
                     <div className="mt-1 text-sm text-[#8D817C]">
-                      {selectedPlan?.name} • {tool.seats} seats
+                      {selectedPlan?.name} • {tool.seats} {quantityLabel}{tool.seats === 1 ? "" : "s"}
                     </div>
                   </div>
 

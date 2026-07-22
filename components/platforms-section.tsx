@@ -9,9 +9,10 @@ const platforms = [
   "Claude",
   "Copilot",
   "Gemini",
-  "OpenAI API",
-  "Anthropic API",
-  "Windsurf",
+  "Notion AI",
+  "Midjourney",
+  "Perplexity",
+  "Canva AI",
 ];
 
 export function PlatformsSection() {
@@ -28,7 +29,7 @@ export function PlatformsSection() {
           </h2>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-[#9A8C98]">
-            TokenGuard audits subscriptions, APIs, and seat-based AI tools across the platforms startup teams rely on every day.
+            TokenGuard audits public-plan subscriptions, paid accounts, and invoice-backed AI spend across the tools startup teams rely on every day.
           </p>
         </div>
 
