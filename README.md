@@ -44,7 +44,7 @@ flowchart LR
   I --> J[Optional lead capture]
   J --> K[(Supabase audit_reports)]
   J --> L[Resend email]
-  K --> M[/audit/report/:id]
+  K --> M["/audit/report/:id"]
 ```
 
 ## Savings labels matter

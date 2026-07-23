@@ -12,7 +12,6 @@ const platforms = [
   "Notion AI",
   "Midjourney",
   "Perplexity",
-  "Canva AI",
 ];
 
 export function PlatformsSection() {
