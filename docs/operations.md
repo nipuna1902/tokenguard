@@ -56,9 +56,9 @@ Open `http://localhost:3000`. Useful commands are:
 | `npm run build` | Produces a production build and performs Next.js type/build checks. |
 | `npm run start` | Serves a successful production build locally. |
 
-There is currently **no** `test` or `test:watch` script in `package.json`, and no test runner dependency. See [TESTS.md](../TESTS.md) for the current verification matrix and the recommended test suite.
+There is currently **no** `test` or `test:watch` script in `package.json`, and no test runner dependency.
 
-At the documentation review date, `timeout 45s npm run lint` emitted no diagnostics before timing out in this workspace. Do not present lint as passing until its file scope/ignores are diagnosed in a clean checkout; see [TESTS.md](../TESTS.md#current-lint-caveat).
+Run `npm run lint` as the project lint gate before release. Add automated tests and CI coverage before treating lint alone as sufficient release verification.
 
 ### Local environment file
 

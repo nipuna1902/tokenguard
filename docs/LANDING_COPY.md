@@ -1,7 +1,7 @@
 # Landing-page copy and claim guide
 
 > **Purpose:** approved product messaging for TokenGuard.
-> **Important:** this is a copy specification, not proof that every phrase is already implemented in `components/`. Before publishing a claim, compare it with the runtime catalog in [`lib/pricing-data.ts`](lib/pricing-data.ts) and the limits in [docs/audit-methodology.md](docs/audit-methodology.md).
+> **Important:** this is a copy specification, not proof that every phrase is already implemented in `components/`. Before publishing a claim, compare it with the runtime catalog in [`lib/pricing-data.ts`](../lib/pricing-data.ts) and the limits in [audit-methodology.md](audit-methodology.md).
 
 ## Positioning
 
@@ -78,11 +78,11 @@ The catalog uses a manually maintained public USD price snapshot. Taxes, regiona
 
 ### Does TokenGuard forecast API or token costs?
 
-Not today. API and contracted costs can be entered as one invoice-backed line item, but the app does not model token volumes, model mix, or future usage. See [docs/audit-methodology.md](docs/audit-methodology.md) for the roadmap to a real forecast.
+Not today. API and contracted costs can be entered as one invoice-backed line item, but the app does not model token volumes, model mix, or future usage. See [audit-methodology.md](audit-methodology.md) for the roadmap to a real forecast.
 
 ### Is company information visible in a shareable report?
 
-The public page does not render email, company, or role. However, the current Supabase access pattern needs a server-side/RLS hardening pass before real PII is collected. See [docs/operations.md](docs/operations.md) for the production requirement.
+The public page does not render email, company, or role. However, the current Supabase access pattern needs a server-side/RLS hardening pass before real PII is collected. See [operations.md](operations.md) for the production requirement.
 
 ## Social proof and proof standards
 

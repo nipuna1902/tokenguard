@@ -2,7 +2,7 @@
 
 > **Canonical architecture reference.** This document describes the code that is in this repository as inspected on 2026-07-21. When an older product document, landing-page claim, or screenshot conflicts with the source, the source code wins.
 
-**Companion documentation:** [audit methodology](docs/audit-methodology.md) for the rules and evidence model and [operations guide](docs/operations.md) for setup, deployment, and security.
+**Companion documentation:** [audit methodology](audit-methodology.md) for the rules and evidence model and [operations guide](operations.md) for setup, deployment, and security.
 
 ## 1. The 30-second explanation
 

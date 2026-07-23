@@ -52,7 +52,7 @@ The product is most useful before a renewal, budget review, finance close, procu
 | “Enter a recent invoice when public price is not enough.” | “We automatically ingest all billing data.” |
 | “Public price snapshot, last reviewed on a documented date.” | “Always-current pricing.” |
 
-See [LANDING_COPY.md](LANDING_COPY.md) for user-facing wording and [docs/audit-methodology.md](docs/audit-methodology.md) for the technical limits behind it.
+See [LANDING_COPY.md](LANDING_COPY.md) for user-facing wording and [audit-methodology.md](audit-methodology.md) for the technical limits behind it.
 
 ## Acquisition hypotheses
 

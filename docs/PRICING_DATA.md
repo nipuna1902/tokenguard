@@ -1,13 +1,13 @@
 # Pricing data, sources, and maintenance
 
-> **Runtime source of truth:** [`lib/pricing-data.ts`](lib/pricing-data.ts)
+> **Runtime source of truth:** [`lib/pricing-data.ts`](../lib/pricing-data.ts)
 >
 > **Snapshot recorded in code:** 2026-07-21
 > **Currency and scope:** public USD list prices; tax, regional pricing, credits, negotiated terms, and variable overages are not modeled unless included in a user-entered invoice subtotal.
 
 This document explains what the application actually knows about prices, how it uses those values, and how to keep that knowledge safe. It is not a vendor contract or a claim that every customer pays the listed amount.
 
-For calculation rules and precision limits, read [docs/audit-methodology.md](docs/audit-methodology.md). For the reason pricing math is deterministic rather than LLM-generated, read [PROMPTS.md](PROMPTS.md).
+For calculation rules and precision limits, read [audit-methodology.md](audit-methodology.md).
 
 ## Core principle
 
@@ -123,7 +123,7 @@ The metadata is intentionally small:
 
 ## Exact cost behavior
 
-For a tool entry, [`monthlyCost`](lib/audit-engine.ts) calculates:
+For a tool entry, [`monthlyCost`](../lib/audit-engine.ts) calculates:
 
 ```txt
 listCost = plan.monthlyPrice × quantity  (0 for a quote-only plan)
@@ -180,7 +180,7 @@ Follow this process every time a vendor price, plan name, or cadence changes:
 1. Open the official source page and capture the country, currency, billing cadence, tax statement, plan name, and effective date.
 2. Decide whether the plan is self-serve, quote-only, fixed per seat, or usage/metered. Do not turn a quote or metered service into a fixed price without an explicit model and tests.
 3. Update `lib/pricing-data.ts`; preserve plan IDs when semantics have not changed so saved drafts/reports remain readable.
-4. Update this table, the code's `Last reviewed` comment, [docs/audit-methodology.md](docs/audit-methodology.md), and any user-facing marketing copy that names supported products.
+4. Update this table, the code's `Last reviewed` comment, [audit-methodology.md](audit-methodology.md), and any user-facing marketing copy that names supported products.
 5. Exercise all affected audit rules—list cost, invoice override, premium downgrade, small-team check, annual alternative, and overlap—as applicable.
 6. Record a changelog note with the source URL and verification date. For production, persist a price-catalog version with every saved report.
 

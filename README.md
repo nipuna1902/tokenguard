@@ -55,7 +55,7 @@ flowchart LR
 | **Reviewable opportunity** | Possible premium-to-lower-plan change, small-team team-plan change, annual-billing alternative, coding/general-assistant overlap, or an invoice above base list price. | Validate feature needs, contracts, usage, data controls, and renewal terms before action. Never add it to the verified total. |
 | **Invoice/contracted entry** | A quote-based or generic API entry requires a positive monthly invoice subtotal and receives no speculative saving. | Use it to establish spend visibility, then inspect vendor usage and budget controls. |
 
-The detailed formulas, examples, and guardrails are in [PRICING_DATA.md](PRICING_DATA.md) and [docs/audit-methodology.md](docs/audit-methodology.md).
+The detailed formulas, examples, and guardrails are in [the pricing reference](docs/PRICING_DATA.md) and [the audit methodology](docs/audit-methodology.md).
 
 ## Architecture at a glance
 
@@ -71,7 +71,7 @@ The detailed formulas, examples, and guardrails are in [PRICING_DATA.md](PRICING
 | Public report | Server-rendered dynamic route at `/audit/report/[id]` |
 | Styling | Tailwind CSS, shadcn/ui primitives, Framer Motion |
 
-For the full component map, trust boundaries, and data-flow diagrams, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For the full component map, trust boundaries, and data-flow diagrams, see [the architecture reference](docs/ARCHITECTURE.md).
 
 ## Repository map
 
@@ -95,16 +95,15 @@ Start here to explore the project:
 
 | Read this | Why it exists |
 | --- | --- |
-| [DOCUMENTATION.md](DOCUMENTATION.md) | Reading order and source-of-truth guide. |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | System design, component roles, data flows, and scaling discussion. |
-| [PRICING_DATA.md](PRICING_DATA.md) | Implemented catalog, formulas, recommendation rules, and price-maintenance process. |
-| [PROMPTS.md](PROMPTS.md) | Gemini boundary, request contract, prompt behavior, and fallbacks. |
+| [Documentation guide](docs/DOCUMENTATION.md) | Reading order and source-of-truth guide. |
+| [Architecture reference](docs/ARCHITECTURE.md) | System design, component roles, data flows, and scaling discussion. |
+| [Pricing reference](docs/PRICING_DATA.md) | Implemented catalog, formulas, recommendation rules, and price-maintenance process. |
 | [docs/README.md](docs/README.md) | Entry point for the detailed technical-documents folder. |
 | [docs/audit-methodology.md](docs/audit-methodology.md) | Precision model, examples, limitations, and improvement roadmap. |
 | [docs/operations.md](docs/operations.md) | Environment setup, database contract, deployment, security, and incident handling. |
-| [TESTS.md](TESTS.md) | Actual verification status, manual acceptance matrix, and recommended automated coverage. |
+| [Verification section](#verification-commands) | Available quality checks and test-suite status. |
 
-The remaining top-level Markdown files cover product strategy, measurement, economics, and copy. Their status and intended use are documented in [DOCUMENTATION.md](DOCUMENTATION.md).
+The remaining product and go-to-market references are in [docs/](docs/README.md).
 
 ## Local setup
 
@@ -146,13 +145,13 @@ npm run build
 npm run lint
 ```
 
-The repository does not currently define an automated test script or checked-in test suite. Do not claim that `npm run test` exists; [TESTS.md](TESTS.md) documents the current manual matrix and the next automated tests to add. At the documentation review date, the project-wide lint command produced no diagnostics before a 45-second timeout in this workspace, so resolve that tooling behavior before treating lint as a release gate.
+The repository does not currently define an automated test script or checked-in test suite. Do not claim that `npm run test` exists. `npm run lint` is the available lint gate.
 
 ## Pricing maintenance
 
 `lib/pricing-data.ts` is an intentionally small snapshot, not a live pricing feed. Before a production release or a material vendor-pricing change:
 
-1. Recheck the official vendor pages linked in [PRICING_DATA.md](PRICING_DATA.md).
+1. Recheck the official vendor pages linked in [docs/PRICING_DATA.md](docs/PRICING_DATA.md).
 2. Confirm currency, country, billing cadence, included usage, taxes, and whether a plan is self-serve or quote-only.
 3. Update the catalog, its review date, calculations/examples, and tests together.
 4. Keep contracted and metered pricing invoice-driven unless the unit model is explicitly modeled and tested.

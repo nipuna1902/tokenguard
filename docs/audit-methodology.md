@@ -216,7 +216,7 @@ The current system is dependable for a transparent first-pass subscription audit
 1. **Version and snapshot prices.** Store source URL, retrieval date, currency, region, billing cadence, and a content/version hash for every price used. Save that snapshot with each report.
 2. **Capture invoice context.** Collect billing period, currency, tax, credits, committed-use discounts, add-ons, annual commitments, and whether the amount is subscription, API, or blended spend.
 3. **Validate and save through a server-side boundary.** Revalidate inputs and calculated results on the server; use a generated report record with strict RLS, instead of trusting a browser insert as the authoritative report artifact.
-4. **Add regression tests and CI.** Test exact money arithmetic, quote-plan validation, zero-invoice behavior, review overlap, invalid local state, public-report snapshots, and API fallbacks. The current `package.json` has lint/build scripts but no test script or test files; [TESTS.md](../TESTS.md) records the gap and the proposed suite.
+4. **Add regression tests and CI.** Test exact money arithmetic, quote-plan validation, zero-invoice behavior, review overlap, invalid local state, public-report snapshots, and API fallbacks. The current `package.json` has lint/build scripts but no test script or test files.
 
 ### P1 — replace proxies with operating evidence
 
